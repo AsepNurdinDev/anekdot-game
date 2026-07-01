@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anekdot Maze Runner - 10 Tantangan</title>
     <style>
@@ -56,7 +56,6 @@
             position: relative;
         }
 
-        /* MAZE BOARD */
         #maze-canvas {
             background-color: var(--path-color);
             border: 4px solid var(--wall-color);
@@ -64,7 +63,6 @@
             box-shadow: 0 0 20px rgba(58, 12, 163, 0.5);
         }
 
-        /* SIDEBAR INFO */
         #sidebar {
             width: 280px;
             display: flex;
@@ -82,7 +80,6 @@
         .info-panel h3 { font-size: 15px; color: #72efdd; margin-bottom: 8px; text-transform: uppercase;}
         .info-panel p { font-size: 13px; margin-bottom: 4px; color: #cbd5e1;}
 
-        /* IFP VIRTUAL D-PAD CONTROLLER */
         #controller {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -109,7 +106,6 @@
             color: #0b0c10;
         }
 
-        /* SCREEN OVERLAYS */
         .overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -183,7 +179,6 @@
         const canvas = document.getElementById("maze-canvas");
         const ctx = canvas.getContext("2d");
 
-        // 1 = Dinding, 0 = Jalan Utama
         const maze = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
@@ -207,46 +202,16 @@
         ];
 
         const questionsData = [
-            {
-                q: "1. Bagian awal teks anekdot yang berfungsi memberikan gambaran umum tentang isi cerita disebut...",
-                a: "Abstraksi", b: "Orientasi", c: "Krisis", correct: "A"
-            },
-            {
-                q: "2. Bagian yang menunjukkan awal kejadian cerita atau latar belakang bagaimana peristiwa utama bisa terjadi disebut...",
-                a: "Koda", b: "Orientasi", c: "Reaksi", correct: "B"
-            },
-            {
-                q: "3. Struktur anekdot tempat terjadinya puncak masalah yang unik, ganjil, lucu, atau berisi sindiran utama adalah...",
-                a: "Abstraksi", b: "Krisis", c: "Reaksi", correct: "B"
-            },
-            {
-                q: "4. Bagian yang menunjukkan cara tokoh atau penulis menyelesaikan masalah yang muncul di bagian krisis disebut...",
-                a: "Reaksi", b: "Koda", c: "Orientasi", correct: "A"
-            },
-            {
-                q: "5. Bagian penutup teks anekdot yang berisi kesimpulan, penegasan, atau akhir dari perubahan tokoh dinamakan...",
-                a: "Krisis", b: "Abstraksi", c: "Koda", correct: "C"
-            },
-            {
-                q: "6. 'Seorang dosen hukum sedang memberikan kuliah pidana. Suasana kelas tenang...' Penggalan teks tersebut termasuk bagian...",
-                a: "Orientasi", b: "Krisis", c: "Koda", correct: "A"
-            },
-            {
-                q: "7. 'Kantin kampus kurang kursi, atau pejabat takut kehilangan kursi jabatannya?'. Kalimat ini mengandung bagian esensial anekdot yaitu...",
-                a: "Abstraksi semata", b: "Krisis (Sindiran Utama)", c: "Koda formal", correct: "B"
-            },
-            {
-                q: "8. Perbedaan utama antara teks anekdot dengan teks humor biasa (lawakan) terletak pada adanya...",
-                a: "Kritik/sindiran sosial tersirat", b: "Jumlah tokoh yang banyak", c: "Cerita fiksi hantu", correct: "A"
-            },
-            {
-                q: "9. Teks anekdot biasanya mengangkat cerita mengenai orang penting, tokoh masyarakat, atau fenomena sosial yang berdasarkan...",
-                a: "Dongeng masa lalu", b: "Kejadian/fakta yang dikemas lucu", c: "Rumus matematika", correct: "B"
-            },
-            {
-                q: "10. 'Akhirnya, mahasiswa tersebut pulang dengan tersenyum getir menyadari sistem birokrasi negerinya.' Struktur penutup ini adalah...",
-                a: "Abstraksi", b: "Krisis", c: "Koda", correct: "C"
-            }
+            { q: "1. Bagian awal teks anekdot yang berfungsi memberikan gambaran umum tentang isi cerita disebut...", a: "Abstraksi", b: "Orientasi", c: "Krisis", correct: "A" },
+            { q: "2. Bagian yang menunjukkan awal kejadian cerita atau latar belakang bagaimana peristiwa utama bisa terjadi disebut...", a: "Koda", b: "Orientasi", c: "Reaksi", correct: "B" },
+            { q: "3. Struktur anekdot tempat terjadinya puncak masalah yang unik, ganjil, lucu, atau berisi sindiran utama adalah...", a: "Abstraksi", b: "Krisis", c: "Reaksi", correct: "B" },
+            { q: "4. Bagian yang menunjukkan cara tokoh atau penulis menyelesaikan masalah yang muncul di bagian krisis disebut...", a: "Reaksi", b: "Koda", c: "Orientasi", correct: "A" },
+            { q: "5. Bagian penutup teks anekdot yang berisi kesimpulan, penegasan, atau akhir dari perubahan tokoh dinamakan...", a: "Krisis", b: "Abstraksi", c: "Koda", correct: "C" },
+            { q: "6. 'Seorang dosen hukum sedang memberikan kuliah pidana. Suasana kelas tenang...' Penggalan teks tersebut termasuk bagian...", a: "Orientasi", b: "Krisis", c: "Koda", correct: "A" },
+            { q: "7. 'Kantin kampus kurang kursi, atau pejabat takut kehilangan kursi jabatannya?'. Kalimat ini mengandung bagian esensial anekdot yaitu...", a: "Abstraksi semata", b: "Krisis (Sindiran Utama)", c: "Koda formal", correct: "B" },
+            { q: "8. Perbedaan utama antara teks anekdot dengan teks humor biasa (lawakan) terletak pada adanya...", a: "Kritik/sindiran sosial tersirat", b: "Jumlah tokoh yang banyak", c: "Cerita fiksi hantu", correct: "A" },
+            { q: "9. Teks anekdot biasanya mengangkat cerita mengenai orang penting, tokoh masyarakat, atau fenomena sosial yang berdasarkan...", a: "Dongeng masa lalu", b: "Kejadian/fakta yang dikemas lucu", c: "Rumus matematika", correct: "B" },
+            { q: "10. 'Akhirnya, mahasiswa tersebut pulang dengan tersenyum getir menyadari sistem birokrasi negerinya.' Struktur penutup ini adalah...", a: "Abstraksi", b: "Krisis", c: "Koda", correct: "C" }
         ];
 
         let currentQIdx = 0;
@@ -325,7 +290,7 @@
             if (maze[nextY] && maze[nextY][nextX] === 0) {
                 player.x = nextX;
                 player.y = nextY;
-                checkCollision(); // Cek tabrakan saat player bergerak
+                checkCollision();
                 if(gameActive) checkWinCondition();
             }
         }
@@ -425,6 +390,5 @@
             }
         }
     </script>
-
 </body>
 </html>
