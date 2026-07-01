@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0049)file:///D:/SMKN%202%20SINGARAJA/anekdottteks.html -->
-<html lang="id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html lang="id">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anekdot Maze Runner - 10 Tantangan</title>
     <style>
@@ -133,10 +133,10 @@
     </div>
 
     <div id="main-container">
-        <div id="start-screen" class="overlay hidden">
+        <div id="start-screen" class="overlay">
             <h1 style="color: #4cc9f0; font-size: 36px; margin-bottom: 20px;">10 LABIRIN STRUKTUR</h1>
             <p style="text-align: center; max-width: 550px; margin-bottom: 30px; line-height: 1.6; font-size: 14px;">
-                Arahkan detektif 🟩 menggunakan tombol D-Pad menuju Gerbang Jawaban (A, B, atau C) yang benar di dalam labirin. Hindari kejaran Virus Gagal Paham 🟥! Selesaikan total 10 misi berturut-turut!
+                Arahkan detektif 🟩 menggunakan tombol D-Pad atau Keyboard (Arah Panah) menuju Gerbang Jawaban (A, B, atau C) yang benar di dalam labirin. Hindari kejaran Virus Gagal Paham 🟥! Selesaikan total 10 misi berturut-turut!
             </p>
             <button onclick="startGame()" style="padding: 15px 40px; font-size: 20px; background: #f72585; border: none; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 0 15px #f72585;">MULAI MISI</button>
         </div>
@@ -167,13 +167,13 @@
 
             <div id="controller">
                 <div></div>
-                <button class="ctrl-btn" onclick="movePlayer(&#39;UP&#39;)">▲</button>
+                <button class="ctrl-btn" onclick="movePlayer('UP')">▲</button>
                 <div></div>
-                <button class="ctrl-btn" onclick="movePlayer(&#39;LEFT&#39;)">◀</button>
+                <button class="ctrl-btn" onclick="movePlayer('LEFT')">◀</button>
                 <button class="ctrl-btn" style="background:#151b26; border:none; box-shadow:none; cursor:default;"></button>
-                <button class="ctrl-btn" onclick="movePlayer(&#39;RIGHT&#39;)">▶</button>
+                <button class="ctrl-btn" onclick="movePlayer('RIGHT')">▶</button>
                 <div></div>
-                <button class="ctrl-btn" onclick="movePlayer(&#39;DOWN&#39;)">▼</button>
+                <button class="ctrl-btn" onclick="movePlayer('DOWN')">▼</button>
                 <div></div>
             </div>
         </div>
@@ -206,7 +206,6 @@
             { letter: 'C', gridX: 7, gridY: 5 }
         ];
 
-        // 10 SOAL MATERI TEKS ANEKDOT KELAS 10 LENGKAP
         const questionsData = [
             {
                 q: "1. Bagian awal teks anekdot yang berfungsi memberikan gambaran umum tentang isi cerita disebut...",
@@ -253,15 +252,20 @@
         let currentQIdx = 0;
         let score = 0;
         let lives = 3;
+        let gameActive = false;
+        let enemyInterval = null;
 
         let player = { x: 1, y: 9 };
         let enemy = { x: 13, y: 9 };
 
         function startGame() {
             document.getElementById("start-screen").classList.add("hidden");
+            gameActive = true;
             loadQuestion();
             gameLoop();
-            setInterval(moveEnemyLogic, 420); // Sedikit dipercepat agar menantang
+            if(!enemyInterval) {
+                enemyInterval = setInterval(moveEnemyLogic, 420);
+            }
         }
 
         function loadQuestion() {
@@ -309,6 +313,7 @@
         }
 
         function movePlayer(dir) {
+            if (!gameActive) return;
             let nextX = player.x;
             let nextY = player.y;
 
@@ -317,10 +322,11 @@
             if (dir === "LEFT") nextX--;
             if (dir === "RIGHT") nextX++;
 
-            if (maze[nextY][nextX] === 0) {
+            if (maze[nextY] && maze[nextY][nextX] === 0) {
                 player.x = nextX;
                 player.y = nextY;
-                checkWinCondition();
+                checkCollision(); // Cek tabrakan saat player bergerak
+                if(gameActive) checkWinCondition();
             }
         }
 
@@ -332,6 +338,7 @@
         });
 
         function moveEnemyLogic() {
+            if (!gameActive) return;
             let diffX = player.x - enemy.x;
             let diffY = player.y - enemy.y;
             let nextX = enemy.x;
@@ -343,7 +350,7 @@
                 nextY += diffY > 0 ? 1 : -1;
             }
 
-            if (maze[nextY][nextX] === 0) {
+            if (maze[nextY] && maze[nextY][nextX] === 0) {
                 enemy.x = nextX;
                 enemy.y = nextY;
             }
@@ -370,13 +377,15 @@
                 if (player.x === z.gridX && player.y === z.gridY) {
                     const currentCorrect = questionsData[currentQIdx].correct;
                     if (z.letter === currentCorrect) {
-                        score += 10; // 10 soal x 10 poin = Maksimal 100 poin
+                        score += 10;
                         alert("Bagus! Jawaban kamu benar! Lanjut ke labirin berikutnya.");
                     } else {
                         alert("Kurang tepat! Pembatasan struktur keliru.");
                     }
                     
                     currentQIdx++;
+                    document.getElementById("txt-score").innerText = `Skor: ${score}`;
+                    
                     if (currentQIdx < questionsData.length) {
                         player = { x: 1, y: 9 };
                         enemy = { x: 13, y: 9 };
@@ -384,12 +393,16 @@
                     } else {
                         endGame();
                     }
-                    document.getElementById("txt-score").innerText = `Skor: ${score}`;
                 }
             });
         }
 
         function endGame() {
+            gameActive = false;
+            if (enemyInterval) {
+                clearInterval(enemyInterval);
+                enemyInterval = null;
+            }
             document.getElementById("end-screen").classList.remove("hidden");
             document.getElementById("final-score").innerText = `SKOR AKHIR: ${score}`;
             const feedback = document.getElementById("feedback-text");
@@ -407,8 +420,11 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawMaze();
             drawEntities();
-            requestAnimationFrame(gameLoop);
+            if (gameActive) {
+                requestAnimationFrame(gameLoop);
+            }
         }
     </script>
 
-</body></html>
+</body>
+</html>
