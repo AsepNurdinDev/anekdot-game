@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)file:///D:/SMKN%202%20SINGARAJA/anekdottteks.html -->
+<html lang="id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anekdot Maze Runner - 10 Tantangan</title>
+    <style>
+        :root {
+            --wall-color: #3a0ca3;
+            --path-color: #101424;
+            --player-color: #4cc9f0;
+            --enemy-color: #f72585;
+            --zone-color: #72efdd;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+
+        body {
+            background-color: #0b0c10;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-title {
+            font-size: 28px;
+            color: #4cc9f0;
+            text-shadow: 0 0 10px #4cc9f0;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        #question-box {
+            background: #1f2833;
+            border: 2px solid #4cc9f0;
+            border-radius: 10px;
+            padding: 10px 15px;
+            width: 950px;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.2);
+        }
+
+        #main-container {
+            display: flex;
+            gap: 20px;
+            background: #151b26;
+            padding: 15px;
+            border-radius: 15px;
+            border: 3px solid #3a0ca3;
+            position: relative;
+        }
+
+        /* MAZE BOARD */
+        #maze-canvas {
+            background-color: var(--path-color);
+            border: 4px solid var(--wall-color);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(58, 12, 163, 0.5);
+        }
+
+        /* SIDEBAR INFO */
+        #sidebar {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .info-panel {
+            background: #1f2833;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #3a0ca3;
+        }
+
+        .info-panel h3 { font-size: 15px; color: #72efdd; margin-bottom: 8px; text-transform: uppercase;}
+        .info-panel p { font-size: 13px; margin-bottom: 4px; color: #cbd5e1;}
+
+        /* IFP VIRTUAL D-PAD CONTROLLER */
+        #controller {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .ctrl-btn {
+            background: #3a0ca3;
+            border: 2px solid #4cc9f0;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 12px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #240046;
+            transition: all 0.1s;
+        }
+        .ctrl-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #240046;
+            background: #4cc9f0;
+            color: #0b0c10;
+        }
+
+        /* SCREEN OVERLAYS */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 12, 16, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 12px;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <h1 id="game-title">⚡ ANEKDOT MAZE RUNNER ⚡</h1>
+    
+    <div id="question-box">
+        <b style="color: #f72585;">MISI:</b> <span id="current-question">1. Bagian awal teks anekdot yang berfungsi memberikan gambaran umum tentang isi cerita disebut...</span>
+    </div>
+
+    <div id="main-container">
+        <div id="start-screen" class="overlay hidden">
+            <h1 style="color: #4cc9f0; font-size: 36px; margin-bottom: 20px;">10 LABIRIN STRUKTUR</h1>
+            <p style="text-align: center; max-width: 550px; margin-bottom: 30px; line-height: 1.6; font-size: 14px;">
+                Arahkan detektif 🟩 menggunakan tombol D-Pad menuju Gerbang Jawaban (A, B, atau C) yang benar di dalam labirin. Hindari kejaran Virus Gagal Paham 🟥! Selesaikan total 10 misi berturut-turut!
+            </p>
+            <button onclick="startGame()" style="padding: 15px 40px; font-size: 20px; background: #f72585; border: none; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 0 15px #f72585;">MULAI MISI</button>
+        </div>
+
+        <div id="end-screen" class="overlay hidden">
+            <h1 style="color: #72efdd; font-size: 38px; margin-bottom: 15px;">MISI AKHIR SELESAI!</h1>
+            <h2 id="final-score" style="font-size: 50px; color: #4cc9f0; margin-bottom: 20px;">SKOR: 0</h2>
+            <p id="feedback-text" style="margin-bottom: 30px; font-size: 15px; text-align: center; max-width: 500px; line-height: 1.5;"></p>
+            <button onclick="location.reload()" style="padding: 12px 30px; font-size: 18px; background: #3a0ca3; border: 2px solid #4cc9f0; color: white; border-radius: 10px; cursor: pointer;">Main Lagi 🔄</button>
+        </div>
+
+        <canvas id="maze-canvas" width="600" height="450"></canvas>
+
+        <div id="sidebar">
+            <div class="info-panel">
+                <h3>Status Agen</h3>
+                <p id="txt-level">Tantangan: 1 / 10</p>
+                <p id="txt-score">Skor: 0</p>
+                <p id="txt-lives">Nyawa: ❤️❤️❤️</p>
+            </div>
+
+            <div class="info-panel" style="flex-grow: 1; margin-top: 5px; margin-bottom: 5px;">
+                <h3>Gerbang Jawaban</h3>
+                <p><b style="color:#72efdd;">[A]</b> <span id="lbl-a">Abstraksi</span></p>
+                <p style="margin-top: 4px;"><b style="color:#72efdd;">[B]</b> <span id="lbl-b">Orientasi</span></p>
+                <p style="margin-top: 4px;"><b style="color:#72efdd;">[C]</b> <span id="lbl-c">Krisis</span></p>
+            </div>
+
+            <div id="controller">
+                <div></div>
+                <button class="ctrl-btn" onclick="movePlayer(&#39;UP&#39;)">▲</button>
+                <div></div>
+                <button class="ctrl-btn" onclick="movePlayer(&#39;LEFT&#39;)">◀</button>
+                <button class="ctrl-btn" style="background:#151b26; border:none; box-shadow:none; cursor:default;"></button>
+                <button class="ctrl-btn" onclick="movePlayer(&#39;RIGHT&#39;)">▶</button>
+                <div></div>
+                <button class="ctrl-btn" onclick="movePlayer(&#39;DOWN&#39;)">▼</button>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("maze-canvas");
+        const ctx = canvas.getContext("2d");
+
+        // 1 = Dinding, 0 = Jalan Utama
+        const maze = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+            [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        const tileSize = 40;
+
+        const zones = [
+            { letter: 'A', gridX: 1, gridY: 1 },
+            { letter: 'B', gridX: 13, gridY: 1 },
+            { letter: 'C', gridX: 7, gridY: 5 }
+        ];
+
+        // 10 SOAL MATERI TEKS ANEKDOT KELAS 10 LENGKAP
+        const questionsData = [
+            {
+                q: "1. Bagian awal teks anekdot yang berfungsi memberikan gambaran umum tentang isi cerita disebut...",
+                a: "Abstraksi", b: "Orientasi", c: "Krisis", correct: "A"
+            },
+            {
+                q: "2. Bagian yang menunjukkan awal kejadian cerita atau latar belakang bagaimana peristiwa utama bisa terjadi disebut...",
+                a: "Koda", b: "Orientasi", c: "Reaksi", correct: "B"
+            },
+            {
+                q: "3. Struktur anekdot tempat terjadinya puncak masalah yang unik, ganjil, lucu, atau berisi sindiran utama adalah...",
+                a: "Abstraksi", b: "Krisis", c: "Reaksi", correct: "B"
+            },
+            {
+                q: "4. Bagian yang menunjukkan cara tokoh atau penulis menyelesaikan masalah yang muncul di bagian krisis disebut...",
+                a: "Reaksi", b: "Koda", c: "Orientasi", correct: "A"
+            },
+            {
+                q: "5. Bagian penutup teks anekdot yang berisi kesimpulan, penegasan, atau akhir dari perubahan tokoh dinamakan...",
+                a: "Krisis", b: "Abstraksi", c: "Koda", correct: "C"
+            },
+            {
+                q: "6. 'Seorang dosen hukum sedang memberikan kuliah pidana. Suasana kelas tenang...' Penggalan teks tersebut termasuk bagian...",
+                a: "Orientasi", b: "Krisis", c: "Koda", correct: "A"
+            },
+            {
+                q: "7. 'Kantin kampus kurang kursi, atau pejabat takut kehilangan kursi jabatannya?'. Kalimat ini mengandung bagian esensial anekdot yaitu...",
+                a: "Abstraksi semata", b: "Krisis (Sindiran Utama)", c: "Koda formal", correct: "B"
+            },
+            {
+                q: "8. Perbedaan utama antara teks anekdot dengan teks humor biasa (lawakan) terletak pada adanya...",
+                a: "Kritik/sindiran sosial tersirat", b: "Jumlah tokoh yang banyak", c: "Cerita fiksi hantu", correct: "A"
+            },
+            {
+                q: "9. Teks anekdot biasanya mengangkat cerita mengenai orang penting, tokoh masyarakat, atau fenomena sosial yang berdasarkan...",
+                a: "Dongeng masa lalu", b: "Kejadian/fakta yang dikemas lucu", c: "Rumus matematika", correct: "B"
+            },
+            {
+                q: "10. 'Akhirnya, mahasiswa tersebut pulang dengan tersenyum getir menyadari sistem birokrasi negerinya.' Struktur penutup ini adalah...",
+                a: "Abstraksi", b: "Krisis", c: "Koda", correct: "C"
+            }
+        ];
+
+        let currentQIdx = 0;
+        let score = 0;
+        let lives = 3;
+
+        let player = { x: 1, y: 9 };
+        let enemy = { x: 13, y: 9 };
+
+        function startGame() {
+            document.getElementById("start-screen").classList.add("hidden");
+            loadQuestion();
+            gameLoop();
+            setInterval(moveEnemyLogic, 420); // Sedikit dipercepat agar menantang
+        }
+
+        function loadQuestion() {
+            const data = questionsData[currentQIdx];
+            document.getElementById("current-question").innerText = data.q;
+            document.getElementById("lbl-a").innerText = data.a;
+            document.getElementById("lbl-b").innerText = data.b;
+            document.getElementById("lbl-c").innerText = data.c;
+            document.getElementById("txt-level").innerText = `Tantangan: ${currentQIdx + 1} / ${questionsData.length}`;
+        }
+
+        function drawMaze() {
+            for (let r = 0; r < maze.length; r++) {
+                for (let c = 0; c < maze[r].length; c++) {
+                    if (maze[r][c] === 1) {
+                        ctx.fillStyle = "#3a0ca3";
+                        ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+                        ctx.strokeStyle = "#240046";
+                        ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+
+            zones.forEach(z => {
+                ctx.fillStyle = "rgba(114, 239, 221, 0.15)";
+                ctx.fillRect(z.gridX * tileSize, z.gridY * tileSize, tileSize, tileSize);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#72efdd";
+                ctx.strokeRect(z.gridX * tileSize, z.gridY * tileSize, tileSize, tileSize);
+                
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 18px Arial";
+                ctx.fillText(z.letter, z.gridX * tileSize + 14, z.gridY * tileSize + 26);
+            });
+        }
+
+        function drawEntities() {
+            ctx.fillStyle = "#4cc9f0";
+            ctx.fillRect(player.x * tileSize + 6, player.y * tileSize + 6, tileSize - 12, tileSize - 12);
+            
+            ctx.fillStyle = "#f72585";
+            ctx.beginPath();
+            ctx.arc(enemy.x * tileSize + tileSize/2, enemy.y * tileSize + tileSize/2, tileSize/2 - 6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function movePlayer(dir) {
+            let nextX = player.x;
+            let nextY = player.y;
+
+            if (dir === "UP") nextY--;
+            if (dir === "DOWN") nextY++;
+            if (dir === "LEFT") nextX--;
+            if (dir === "RIGHT") nextX++;
+
+            if (maze[nextY][nextX] === 0) {
+                player.x = nextX;
+                player.y = nextY;
+                checkWinCondition();
+            }
+        }
+
+        window.addEventListener("keydown", e => {
+            if (e.key === "ArrowUp") movePlayer("UP");
+            if (e.key === "ArrowDown") movePlayer("DOWN");
+            if (e.key === "ArrowLeft") movePlayer("LEFT");
+            if (e.key === "ArrowRight") movePlayer("RIGHT");
+        });
+
+        function moveEnemyLogic() {
+            let diffX = player.x - enemy.x;
+            let diffY = player.y - enemy.y;
+            let nextX = enemy.x;
+            let nextY = enemy.y;
+
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                nextX += diffX > 0 ? 1 : -1;
+            } else {
+                nextY += diffY > 0 ? 1 : -1;
+            }
+
+            if (maze[nextY][nextX] === 0) {
+                enemy.x = nextX;
+                enemy.y = nextY;
+            }
+            checkCollision();
+        }
+
+        function checkCollision() {
+            if (player.x === enemy.x && player.y === enemy.y) {
+                lives--;
+                document.getElementById("txt-lives").innerText = "Nyawa: " + "❤️".repeat(lives);
+                alert("Waduh! Kamu tertangkap virus keliru!");
+                
+                player = { x: 1, y: 9 };
+                enemy = { x: 13, y: 9 };
+
+                if (lives <= 0) {
+                    endGame();
+                }
+            }
+        }
+
+        function checkWinCondition() {
+            zones.forEach(z => {
+                if (player.x === z.gridX && player.y === z.gridY) {
+                    const currentCorrect = questionsData[currentQIdx].correct;
+                    if (z.letter === currentCorrect) {
+                        score += 10; // 10 soal x 10 poin = Maksimal 100 poin
+                        alert("Bagus! Jawaban kamu benar! Lanjut ke labirin berikutnya.");
+                    } else {
+                        alert("Kurang tepat! Pembatasan struktur keliru.");
+                    }
+                    
+                    currentQIdx++;
+                    if (currentQIdx < questionsData.length) {
+                        player = { x: 1, y: 9 };
+                        enemy = { x: 13, y: 9 };
+                        loadQuestion();
+                    } else {
+                        endGame();
+                    }
+                    document.getElementById("txt-score").innerText = `Skor: ${score}`;
+                }
+            });
+        }
+
+        function endGame() {
+            document.getElementById("end-screen").classList.remove("hidden");
+            document.getElementById("final-score").innerText = `SKOR AKHIR: ${score}`;
+            const feedback = document.getElementById("feedback-text");
+            
+            if (score >= 80) {
+                feedback.innerText = "Luar biasa, Agen Senior! Kamu berhasil meloloskan diri dari 10 labirin virus dan menguasai seluruh pemahaman struktur teks anekdot dengan sangat matang!";
+            } else if (score >= 50) {
+                feedback.innerText = "Kerja bagus! Kamu berhasil menyelesaikan misi. Masih ada beberapa struktur yang keliru di jalan tadi, yuk dibaca-baca lagi teks anekdotnya!";
+            } else {
+                feedback.innerText = "Misi selesai, namun skor kelas masih di bawah rata-rata. Jangan berkecil hati, mari ulangi lagi bersama-sama!";
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawMaze();
+            drawEntities();
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+
+</body></html>
