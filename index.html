@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anekdot Maze Runner - 10 Tantangan</title>
+    <title>Anekdot Maze Runner - Responsive Custom UI</title>
     <style>
         :root {
             --wall-color: #3a0ca3;
@@ -13,7 +13,12 @@
             --zone-color: #72efdd;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Courier New', Courier, monospace; 
+        }
 
         body {
             background-color: #0b0c10;
@@ -21,16 +26,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
-            overflow: hidden;
+            padding: 10px;
+            overflow-x: hidden;
         }
 
         #game-title {
-            font-size: 28px;
+            font-size: clamp(18px, 4vw, 26px);
             color: #4cc9f0;
             text-shadow: 0 0 10px #4cc9f0;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             text-align: center;
         }
 
@@ -38,9 +44,10 @@
             background: #1f2833;
             border: 2px solid #4cc9f0;
             border-radius: 10px;
-            padding: 10px 15px;
-            width: 950px;
-            font-size: 14px;
+            padding: 12px;
+            width: 100%;
+            max-width: 950px;
+            font-size: clamp(12px, 2.5vw, 14px);
             line-height: 1.4;
             margin-bottom: 10px;
             box-shadow: 0 0 15px rgba(76, 201, 240, 0.2);
@@ -48,11 +55,31 @@
 
         #main-container {
             display: flex;
-            gap: 20px;
+            flex-direction: column;
+            gap: 15px;
             background: #151b26;
             padding: 15px;
             border-radius: 15px;
             border: 3px solid #3a0ca3;
+            position: relative;
+            width: 100%;
+            max-width: 950px;
+            align-items: center;
+        }
+
+        /* Responsive Layout for PC */
+        @media (min-width: 850px) {
+            #main-container {
+                flex-direction: row;
+                align-items: stretch;
+            }
+        }
+
+        /* MAZE BOARD */
+        #canvas-container {
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 4 / 3;
             position: relative;
         }
 
@@ -61,13 +88,25 @@
             border: 4px solid var(--wall-color);
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(58, 12, 163, 0.5);
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
+        /* SIDEBAR INFO */
         #sidebar {
-            width: 280px;
+            width: 100%;
+            max-width: 600px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            gap: 10px;
+        }
+
+        @media (min-width: 850px) {
+            #sidebar {
+                width: 280px;
+                justify-content: space-between;
+            }
         }
 
         .info-panel {
@@ -77,27 +116,33 @@
             border: 1px solid #3a0ca3;
         }
 
-        .info-panel h3 { font-size: 15px; color: #72efdd; margin-bottom: 8px; text-transform: uppercase;}
+        .info-panel h3 { font-size: 14px; color: #72efdd; margin-bottom: 6px; text-transform: uppercase;}
         .info-panel p { font-size: 13px; margin-bottom: 4px; color: #cbd5e1;}
 
+        /* VIRTUAL D-PAD CONTROLLER */
         #controller {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            margin-top: 10px;
+            margin-top: auto;
+            max-width: 220px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .ctrl-btn {
             background: #3a0ca3;
             border: 2px solid #4cc9f0;
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            padding: 12px 0;
+            padding: 10px 0;
             border-radius: 10px;
             cursor: pointer;
             box-shadow: 0 4px 0 #240046;
             transition: all 0.1s;
+            user-select: none;
         }
         .ctrl-btn:active {
             transform: translateY(3px);
@@ -106,45 +151,106 @@
             color: #0b0c10;
         }
 
+        /* SCREEN OVERLAYS */
         .overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(11, 12, 16, 0.95);
+            background: rgba(11, 12, 16, 0.98);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 10;
             border-radius: 12px;
+            padding: 20px;
+            text-align: center;
         }
         .hidden { display: none !important; }
+
+        /* CUSTOM MODAL NOTIFICATION */
+        #custom-alert {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            padding: 20px;
+        }
+        #custom-alert.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-box {
+            background: #1f2833;
+            border: 3px solid #4cc9f0;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(76, 201, 240, 0.4);
+            transform: scale(0.8);
+            transition: transform 0.2s ease;
+        }
+        #custom-alert.show .modal-box {
+            transform: scale(1);
+        }
+        #alert-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        #alert-msg {
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+        .modal-btn {
+            padding: 10px 25px;
+            font-size: 14px;
+            background: #f72585;
+            border: none;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 10px #f72585;
+        }
     </style>
 </head>
 <body>
 
-    <h1 id="game-title">⚡ ANEKDOT MAZE RUNNER ⚡</h1>
+    <h1 id="game-title">⚡ ANEKDOT MAZE RUNNER (REVISI) ⚡</h1>
     
     <div id="question-box">
-        <b style="color: #f72585;">MISI:</b> <span id="current-question">1. Bagian awal teks anekdot yang berfungsi memberikan gambaran umum tentang isi cerita disebut...</span>
+        <b style="color: #f72585;">MISI:</b> <span id="current-question">Memuat tantangan sistem...</span>
     </div>
 
     <div id="main-container">
         <div id="start-screen" class="overlay">
-            <h1 style="color: #4cc9f0; font-size: 36px; margin-bottom: 20px;">10 LABIRIN STRUKTUR</h1>
-            <p style="text-align: center; max-width: 550px; margin-bottom: 30px; line-height: 1.6; font-size: 14px;">
-                Arahkan detektif 🟩 menggunakan tombol D-Pad atau Keyboard (Arah Panah) menuju Gerbang Jawaban (A, B, atau C) yang benar di dalam labirin. Hindari kejaran Virus Gagal Paham 🟥! Selesaikan total 10 misi berturut-turut!
+            <h1 style="color: #4cc9f0; font-size: clamp(20px, 5vw, 32px); margin-bottom: 15px;">10 TANTANGAN SUKSES</h1>
+            <p style="max-width: 550px; margin-bottom: 25px; line-height: 1.6; font-size: clamp(12px, 2.5vw, 14px);">
+                Arahkan detektif 🟩 ke Gerbang Jawaban yang benar. Jalur ke Gerbang C kini sudah diperbaiki dan bisa dilewati sepenuhnya! Hindari kejaran Virus Gagal Paham 🟥!
             </p>
-            <button onclick="startGame()" style="padding: 15px 40px; font-size: 20px; background: #f72585; border: none; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 0 15px #f72585;">MULAI MISI</button>
+            <button onclick="startGame()" style="padding: 12px 35px; font-size: 18px; background: #f72585; border: none; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 0 15px #f72585;">MULAI MISI</button>
         </div>
 
         <div id="end-screen" class="overlay hidden">
-            <h1 style="color: #72efdd; font-size: 38px; margin-bottom: 15px;">MISI AKHIR SELESAI!</h1>
-            <h2 id="final-score" style="font-size: 50px; color: #4cc9f0; margin-bottom: 20px;">SKOR: 0</h2>
-            <p id="feedback-text" style="margin-bottom: 30px; font-size: 15px; text-align: center; max-width: 500px; line-height: 1.5;"></p>
-            <button onclick="location.reload()" style="padding: 12px 30px; font-size: 18px; background: #3a0ca3; border: 2px solid #4cc9f0; color: white; border-radius: 10px; cursor: pointer;">Main Lagi 🔄</button>
+            <h1 style="color: #72efdd; font-size: clamp(24px, 6vw, 36px); margin-bottom: 10px;">MISI AKHIR SELESAI!</h1>
+            <h2 id="final-score" style="font-size: clamp(34px, 8vw, 48px); color: #4cc9f0; margin-bottom: 15px;">SKOR: 0</h2>
+            <p id="feedback-text" style="margin-bottom: 25px; font-size: 14px; max-width: 500px; line-height: 1.5;"></p>
+            <button onclick="location.reload()" style="padding: 10px 25px; font-size: 16px; background: #3a0ca3; border: 2px solid #4cc9f0; color: white; border-radius: 10px; cursor: pointer;">Main Lagi 🔄</button>
         </div>
 
-        <canvas id="maze-canvas" width="600" height="450"></canvas>
+        <div id="canvas-container">
+            <canvas id="maze-canvas" width="600" height="450"></canvas>
+        </div>
 
         <div id="sidebar">
             <div class="info-panel">
@@ -154,11 +260,11 @@
                 <p id="txt-lives">Nyawa: ❤️❤️❤️</p>
             </div>
 
-            <div class="info-panel" style="flex-grow: 1; margin-top: 5px; margin-bottom: 5px;">
+            <div class="info-panel" style="flex-grow: 1;">
                 <h3>Gerbang Jawaban</h3>
-                <p><b style="color:#72efdd;">[A]</b> <span id="lbl-a">Abstraksi</span></p>
-                <p style="margin-top: 4px;"><b style="color:#72efdd;">[B]</b> <span id="lbl-b">Orientasi</span></p>
-                <p style="margin-top: 4px;"><b style="color:#72efdd;">[C]</b> <span id="lbl-c">Krisis</span></p>
+                <p><b style="color:#72efdd;">[A]</b> <span id="lbl-a">Opsi A</span></p>
+                <p style="margin-top: 4px;"><b style="color:#72efdd;">[B]</b> <span id="lbl-b">Opsi B</span></p>
+                <p style="margin-top: 4px;"><b style="color:#72efdd;">[C]</b> <span id="lbl-c">Opsi C</span></p>
             </div>
 
             <div id="controller">
@@ -166,12 +272,20 @@
                 <button class="ctrl-btn" onclick="movePlayer('UP')">▲</button>
                 <div></div>
                 <button class="ctrl-btn" onclick="movePlayer('LEFT')">◀</button>
-                <button class="ctrl-btn" style="background:#151b26; border:none; box-shadow:none; cursor:default;"></button>
+                <button class="ctrl-btn" style="background:transparent; border:none; box-shadow:none; cursor:default;" disabled></button>
                 <button class="ctrl-btn" onclick="movePlayer('RIGHT')">▶</button>
                 <div></div>
                 <button class="ctrl-btn" onclick="movePlayer('DOWN')">▼</button>
                 <div></div>
             </div>
+        </div>
+    </div>
+
+    <div id="custom-alert">
+        <div class="modal-box">
+            <div id="alert-title">Sistem Info</div>
+            <div id="alert-msg">Pesan sistem di sini...</div>
+            <button class="modal-btn" onclick="closeAlert()">Ok, Lanjutkan</button>
         </div>
     </div>
 
@@ -181,15 +295,15 @@
 
         const maze = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
-            [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
-            [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1],
-            [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
-            [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+            [1,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
+            [1,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
+            [1,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
+            [1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
@@ -217,20 +331,36 @@
         let currentQIdx = 0;
         let score = 0;
         let lives = 3;
-        let gameActive = false;
-        let enemyInterval = null;
+        let isGamePaused = false;
 
         let player = { x: 1, y: 9 };
         let enemy = { x: 13, y: 9 };
+        let enemyInterval;
+
+        // Custom Alert Logic
+        function showAlert(title, message, titleColor = "#4cc9f0") {
+            isGamePaused = true;
+            document.getElementById("alert-title").innerText = title;
+            document.getElementById("alert-title").style.color = titleColor;
+            document.getElementById("alert-msg").innerText = message;
+            document.getElementById("custom-alert").classList.add("show");
+        }
+
+        function closeAlert() {
+            document.getElementById("custom-alert").classList.remove("show");
+            isGamePaused = false;
+            
+            // Cek kondisi setelah alert ditutup
+            if (lives <= 0 || currentQIdx >= questionsData.length) {
+                endGame();
+            }
+        }
 
         function startGame() {
             document.getElementById("start-screen").classList.add("hidden");
-            gameActive = true;
             loadQuestion();
             gameLoop();
-            if(!enemyInterval) {
-                enemyInterval = setInterval(moveEnemyLogic, 420);
-            }
+            enemyInterval = setInterval(moveEnemyLogic, 420);
         }
 
         function loadQuestion() {
@@ -255,15 +385,15 @@
             }
 
             zones.forEach(z => {
-                ctx.fillStyle = "rgba(114, 239, 221, 0.15)";
+                ctx.fillStyle = "rgba(114, 239, 221, 0.25)";
                 ctx.fillRect(z.gridX * tileSize, z.gridY * tileSize, tileSize, tileSize);
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 3;
                 ctx.strokeStyle = "#72efdd";
                 ctx.strokeRect(z.gridX * tileSize, z.gridY * tileSize, tileSize, tileSize);
                 
                 ctx.fillStyle = "#fff";
-                ctx.font = "bold 18px Arial";
-                ctx.fillText(z.letter, z.gridX * tileSize + 14, z.gridY * tileSize + 26);
+                ctx.font = "bold 20px Arial";
+                ctx.fillText(z.letter, z.gridX * tileSize + 13, z.gridY * tileSize + 27);
             });
         }
 
@@ -278,7 +408,8 @@
         }
 
         function movePlayer(dir) {
-            if (!gameActive) return;
+            if (isGamePaused) return;
+
             let nextX = player.x;
             let nextY = player.y;
 
@@ -287,15 +418,17 @@
             if (dir === "LEFT") nextX--;
             if (dir === "RIGHT") nextX++;
 
-            if (maze[nextY] && maze[nextY][nextX] === 0) {
+            if (maze[nextY][nextX] === 0) {
                 player.x = nextX;
                 player.y = nextY;
-                checkCollision();
-                if(gameActive) checkWinCondition();
+                checkWinCondition();
             }
         }
 
         window.addEventListener("keydown", e => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                e.preventDefault(); // Mencegah scrolling halaman saat main di laptop/HP
+            }
             if (e.key === "ArrowUp") movePlayer("UP");
             if (e.key === "ArrowDown") movePlayer("DOWN");
             if (e.key === "ArrowLeft") movePlayer("LEFT");
@@ -303,7 +436,8 @@
         });
 
         function moveEnemyLogic() {
-            if (!gameActive) return;
+            if (isGamePaused) return;
+
             let diffX = player.x - enemy.x;
             let diffY = player.y - enemy.y;
             let nextX = enemy.x;
@@ -315,7 +449,7 @@
                 nextY += diffY > 0 ? 1 : -1;
             }
 
-            if (maze[nextY] && maze[nextY][nextX] === 0) {
+            if (maze[nextY][nextX] === 0) {
                 enemy.x = nextX;
                 enemy.y = nextY;
             }
@@ -325,15 +459,12 @@
         function checkCollision() {
             if (player.x === enemy.x && player.y === enemy.y) {
                 lives--;
-                document.getElementById("txt-lives").innerText = "Nyawa: " + "❤️".repeat(lives);
-                alert("Waduh! Kamu tertangkap virus keliru!");
+                document.getElementById("txt-lives").innerText = "Nyawa: " + "❤️".repeat(Math.max(0, lives));
                 
                 player = { x: 1, y: 9 };
                 enemy = { x: 13, y: 9 };
 
-                if (lives <= 0) {
-                    endGame();
-                }
+                showAlert("⚠️ TERINFEKSI!", "Waduh! Kamu tertangkap virus keliru!", "#f72585");
             }
         }
 
@@ -343,41 +474,35 @@
                     const currentCorrect = questionsData[currentQIdx].correct;
                     if (z.letter === currentCorrect) {
                         score += 10;
-                        alert("Bagus! Jawaban kamu benar! Lanjut ke labirin berikutnya.");
+                        document.getElementById("txt-score").innerText = `Skor: ${score}`;
+                        showAlert("🎉 BENAR!", "Bagus! Jawaban kamu benar! Lanjut ke tantangan berikutnya.", "#72efdd");
                     } else {
-                        alert("Kurang tepat! Pembatasan struktur keliru.");
+                        showAlert("❌ KURANG TEPAT", "Waduh, pemahaman strukturnya keliru!", "#f72585");
                     }
                     
                     currentQIdx++;
-                    document.getElementById("txt-score").innerText = `Skor: ${score}`;
-                    
-                    if (currentQIdx < questionsData.length) {
+                    if (currentQIdx < questionsData.length && lives > 0) {
                         player = { x: 1, y: 9 };
                         enemy = { x: 13, y: 9 };
                         loadQuestion();
-                    } else {
-                        endGame();
                     }
                 }
             });
         }
 
         function endGame() {
-            gameActive = false;
-            if (enemyInterval) {
-                clearInterval(enemyInterval);
-                enemyInterval = null;
-            }
+            clearInterval(enemyInterval);
+            isGamePaused = true;
             document.getElementById("end-screen").classList.remove("hidden");
             document.getElementById("final-score").innerText = `SKOR AKHIR: ${score}`;
             const feedback = document.getElementById("feedback-text");
             
             if (score >= 80) {
-                feedback.innerText = "Luar biasa, Agen Senior! Kamu berhasil meloloskan diri dari 10 labirin virus dan menguasai seluruh pemahaman struktur teks anekdot dengan sangat matang!";
+                feedback.innerText = "Luar biasa, Agen Senior! Kamu berhasil meloloskan diri dari labirin dan menguasai struktur teks anekdot dengan sangat matang!";
             } else if (score >= 50) {
-                feedback.innerText = "Kerja bagus! Kamu berhasil menyelesaikan misi. Masih ada beberapa struktur yang keliru di jalan tadi, yuk dibaca-baca lagi teks anekdotnya!";
+                feedback.innerText = "Kerja bagus! Kamu berhasil menyelesaikan misi. Masih ada beberapa struktur yang keliru, yuk dibaca-baca lagi teks anekdotnya!";
             } else {
-                feedback.innerText = "Misi selesai, namun skor kelas masih di bawah rata-rata. Jangan berkecil hati, mari ulangi lagi bersama-sama!";
+                feedback.innerText = "Misi selesai, namun skor masih di bawah rata-rata. Jangan berkecil hati, mari ulangi lagi bersama-sama!";
             }
         }
 
@@ -385,9 +510,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawMaze();
             drawEntities();
-            if (gameActive) {
-                requestAnimationFrame(gameLoop);
-            }
+            requestAnimationFrame(gameLoop);
         }
     </script>
 </body>
